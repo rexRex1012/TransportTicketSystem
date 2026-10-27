@@ -5,7 +5,7 @@ How real transport works, step by step. These double as our user stories and dri
 
 ## 1. Patient trip (standard flow)
 1. A department submits a request to move a patient from their room to a destination.
-2. The call goes to a transporter in the pickup's sector.
+2. The call goes to a transporter in the pickup's sector, who has to acknowledge it (**acknowledged**). See `lists.md` for the timing rules.
 3. The transporter heads to the room (**en route**), finds the nurse, and makes sure they know and that the patient is okay to go (**arrived**).
 4. The transporter scans the wristband to confirm the right patient (**picked up**).
 5. The nurse or tech removes anything that needs to come off before the trip.
@@ -91,6 +91,6 @@ Equipment requests come in two kinds:
 | **Cancel** | The call isn't happening | Patient declined, transport not needed, patient not ready, duplicate request, etc. |
 
 ## Statuses
-new → assigned → en route → arrived → picked up (wristband scan) → completed
+new → assigned → acknowledged → en route → arrived → picked up (wristband scan) → completed
 
-Side states: delayed (with a reason), postponed (back in the queue after 10/20/30 minutes), cancelled (with a reason)
+Side states: delayed (with a reason), postponed (back in the queue after 10/20/30 minutes), cancelled (with a reason). A call can also be flagged **escalated** (see `lists.md`).
