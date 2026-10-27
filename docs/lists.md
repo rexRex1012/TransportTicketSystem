@@ -6,6 +6,11 @@ The fixed options used across the system. These become dropdowns in the request 
 - **Equipment:** bring a type of equipment to a room, or move a specific piece of equipment
 - **Specimen:** pick up specimens and bring them to Labs (like the Endo specimen runs)
 
+## Trip purpose (patient requests)
+- **Transfer:** moving to a new unit or room. The patient's room updates to the destination when the call completes
+- **Test / procedure:** going for a test or procedure (like CT or Endo). The room stays the same, and the trip back is a new request
+- **Discharge:** leaving the hospital. The patient is marked discharged when the call completes
+
 ## Priorities and timing
 | Priority | Escalated after |
 |---|---|

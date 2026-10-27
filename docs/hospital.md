@@ -55,6 +55,12 @@ Created automatically by the system on a schedule. Departments can still request
 - **Endo specimen runs:** Endo (Floor B) to Labs (Floor 2) at 12:00am, 2:00pm, and 4:30pm every day
 - **O2 restock:** from the O2 Room (Floor B) at 12:00am and 7:00pm. Each run goes to the next floor in the rotation (Floor A, 2, 3, 4, 5, 6, 7, then back to A), so 2 different floors get restocked every day. The ED is not in the rotation, except CDU (Floor A), which is
 
+## Time Zone
+All times in this doc (routine runs, shifts) are hospital time, **America/New_York**, including daylight saving. The system stores times in UTC but schedules and reports by hospital time.
+
+## Patients
+Patients are fake and come from a seed script, spread across the units and the ED, each with a current location and room. An admin can add more. A real hospital would get these from its EHR (like Epic).
+
 ## Out of Scope for Transport
 - **Morgue:** transport doesn't handle morgue trips
 - **Other equipment:** only moved when a request says where it needs to go. No routine pickups or returns besides the runs above
