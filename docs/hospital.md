@@ -6,14 +6,21 @@ Editable version: `hospital.excalidraw` (open it at excalidraw.com)
 
 ## Sectors
 - **ED Sector**: North Pod, South Pod, PED I, ER, EDTU, ED CT / X-Ray / Ultrasound, CDU (Floor A)
-- **Main Hospital Sector**: all patient units on Floors 2–7 (OR, PACU, SACU, Labs, 2 ICU, ICUs, East, West, StepDown, Dialysis, PICU, Pedi East, Pedi West)
-- **Shared Areas** (no sector, serve the whole hospital): Radiology, MRI, Endo, Cath Lab, IR, Echo, Vascular Lab, Lobby, Main Pharmacy, Bed Park, O2 Room, Code Cart Pharmacy, Transport Home Base
-- ED and Main Hospital are neighboring sectors
+- **Main Hospital Sector**: all patient units on Floors 2–7 (Labs, 2 ICU, ICUs, East, West, StepDown, Dialysis, PICU, Pedi East, Pedi West)
+- **Surgical Services Sector**: OR, PACU, SACU, IR (Floor 2)
+- **Shared Areas** (no sector, serve the whole hospital): Radiology, MRI, Endo, Cath Lab, Echo, Vascular Lab, Lobby, Main Pharmacy, Bed Park, O2 Room, Code Cart Pharmacy, Transport Home Base
+- Sectors set priority, not walls: everyone works every sector, but at sign-in they pick which sectors are **First** and which are **Secondary**. Usually First = their own sector + Surgical (Surgical is in everyone's First, even when it's considered closed), Secondary = the other sector
+- A call that waits **10+ minutes** goes to the next free transporter from any sector
 
 ### Assignment rule
 1. A job goes to the sector of its **pickup** location
-2. If the pickup is a shared area, it goes by the **destination's** sector
+2. If the pickup is a shared area, or there's no pickup (equipment calls), it goes by the **destination's** sector
 3. If both are shared areas, it goes to **Main Hospital**
+
+### Who gets the call
+- At sign-in, each transporter picks their **First** and **Secondary** sectors from the dispatcher's schedule (usually their own sector + Surgical in First, the other sector in Secondary)
+- A new call goes to a free transporter who has that sector in First, whoever has been free the longest. If nobody there is free, a Secondary helper whose First sectors have nothing waiting takes it
+- When a transporter frees up, they get: any call that has waited **10+ minutes** (from any sector), then their First sectors' calls, then their Secondary sectors' calls. STAT first, then oldest
 
 ## Floors
 - **Floor B:** O2 Room (return used tanks, pick up full ones), Code Cart Pharmacy, Endo
@@ -42,7 +49,7 @@ Rooms are numbered floor + room (e.g. 612 = Floor 6, room 12).
 - **Wheelchairs:** Lobby (Floor 1)
 - **O2 tanks:** O2 Room (Floor B), full or empty
 - **Code carts:** Code Cart Pharmacy (Floor B)
-- **Stretchers and other equipment:** parked around the floors, anywhere except hazardous areas. Location comes from the last scan, and requests can ask for the nearest available one
+- **Stretchers and other equipment:** parked around the floors, anywhere except hazardous areas. Location comes from the last scan. Requests don't need a pickup spot, as long as it gets brought
 - **Dirty equipment:** marked dirty where it is. It only gets moved if someone puts in a request for it
 
 ## Location Flags

@@ -22,8 +22,8 @@
 | Delay a call (with a reason) | | Yes | Yes | Yes | |
 | Postpone a call (10/20/30 min, at the nurse's discretion) | | Yes | Yes | Yes | |
 | Get help (up to 3 more transporters) | | Yes | | | |
-| Pick a sector at sign-in | | Yes (from the dispatcher's schedule) | | | |
-| Move transporters to another sector | | | Yes | Yes | |
+| Pick First and Secondary sectors at sign-in | | Yes (from the dispatcher's schedule) | | | |
+| Change a transporter's sectors | | | Yes | Yes | |
 | Go on break / come back from break | | Yes (themselves) | Yes (any transporter) | Yes (any transporter) | |
 | See the full queue | | | Yes | Yes | |
 | Assign and reassign calls | | | Yes | Yes | |
@@ -35,6 +35,6 @@
 ## Notes
 - Requests are scoped to departments: staff only see, edit, and cancel their own department's requests.
 - Postponing happens at the nurse's discretion. The transporter, dispatcher, or manager enters it. A postponed call is taken off the transporter right away and comes back into the queue automatically when the time is up, so nobody waits on it.
-- Transporters pick their sector when they sign in, but it's set by the dispatcher's schedule, not their choice. The dispatcher or manager can move them anytime.
+- Transporters pick their First and Secondary sectors when they sign in, but it's set by the dispatcher's schedule, not their choice. The dispatcher or manager can change them anytime.
 - Only transporters have a break status, since it affects who gets calls. Other staff don't need one.
 - Equipment cleanliness is the transporter's judgment. Stretchers and wheelchairs can be wiped down before use, and dirty beds are usually stripped, so it's obvious. The system doesn't track clean or dirty.
