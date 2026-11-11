@@ -8,7 +8,8 @@ The fixed options used across the system. These become dropdowns in the request 
 
 ## Trip purpose (patient requests)
 - **Transfer:** moving to a new unit or room. The patient's room updates to the destination when the call completes
-- **Test / procedure:** going for a test or procedure (like CT or Endo). The room stays the same, and the trip back is a new request
+- **Test:** going for a test or scan (like CT, MRI, X-ray, or Echo). The room stays the same, and the trip back is a new request
+- **Procedure:** going for surgery or a procedure (like the OR, Cath Lab, IR, or Endo). The room stays the same, and where they go after (back to the room, PACU, or a new unit) is a new request
 - **Discharge:** leaving the hospital. The patient is marked discharged when the call completes
 
 ## Priorities and timing

@@ -67,10 +67,11 @@ Staff submit a **request**. Once it's sent to a transporter, it's a **call**. Sa
 
 **`tripPurpose`** (patient requests only):
 - `TRANSFER`: the patient's room changes to the destination when the call completes (like 403 to 6 ICU, or the ED to a floor)
-- `TEST`: a test or procedure. The room stays the same, and the trip back is a new request
+- `TEST`: a test or scan (CT, MRI, X-ray, Echo). The room stays the same, and the trip back is a new request
+- `PROCEDURE`: surgery or a procedure (OR, Cath Lab, IR, Endo). The room stays the same, and where they go after (back to the room, PACU, or a new unit) is a new request
 - `DISCHARGE`: the patient is marked discharged when the call completes
 
-**Equipment request:** `"type": "EQUIPMENT"` with `equipmentType` (`BED`, `STRETCHER`, `WHEELCHAIR`, `O2_TANK`, `CODE_CART`, `OTHER`), `quantity`, and either a `fromLocationId` (move a specific one) or no start point (bring the nearest one).
+**Equipment request:** `"type": "EQUIPMENT"` with `equipmentType` (`BED`, `STRETCHER`, `WHEELCHAIR`, `O2_TANK`, `CODE_CART`, `OTHER`), `quantity`, and either a `fromLocationId` (move a specific one) or no start point (transport grabs one from wherever and brings it). With no start point, the call goes by the destination's sector.
 
 **Specimen request:** `"type": "SPECIMEN"` with `fromLocationId` (like Endo), `toLocationId` (Labs), and `notes`.
 
@@ -159,7 +160,7 @@ Delayed and escalated are flags on a call, not statuses. Anything else returns a
 ### For the transporter (mobile app)
 | Method | Route | Who | What it does |
 |---|---|---|---|
-| POST | `/api/transporters/me/sign-in` | Transporter | Start your shift in a sector: `{ "sectorId": 1 }` |
+| POST | `/api/transporters/me/sign-in` | Transporter | Start your shift with your sectors: `{ "first": [1, 3], "secondary": [2] }` (sector IDs, like ED + Surgical first, Main secondary) |
 | POST | `/api/transporters/me/sign-out` | Transporter | End your shift. Any open calls get reassigned |
 | GET | `/api/transporters/me/calls` | Transporter | Your current call(s). You never see the open queue |
 | POST | `/api/transporters/me/break` | Transporter | Go on break |
@@ -171,7 +172,7 @@ Delayed and escalated are flags on a call, not statuses. Anything else returns a
 |---|---|---|---|
 | GET | `/api/transporters` | Dispatcher | The transporter board: everyone signed in, with status, sector, current call, and last known location |
 | GET | `/api/transporters/{id}/activity` | Dispatcher | Everything that transporter has done since signing in |
-| PATCH | `/api/transporters/{id}/sector` | Dispatcher | Move them to another sector: `{ "sectorId": 2 }` |
+| PATCH | `/api/transporters/{id}/sectors` | Dispatcher | Change their sectors: `{ "first": [2, 3], "secondary": [1] }` |
 | POST | `/api/transporters/{id}/break` | Dispatcher | Put them on break |
 | POST | `/api/transporters/{id}/break/end` | Dispatcher | Take them off break |
 
@@ -180,7 +181,7 @@ Delayed and escalated are flags on a call, not statuses. Anything else returns a
 ## Hospital data and lists
 | Method | Route | Who | What it does |
 |---|---|---|---|
-| GET | `/api/sectors` | Everyone | ED, Main Hospital |
+| GET | `/api/sectors` | Everyone | ED, Main Hospital, Surgical Services |
 | GET | `/api/locations` | Everyone | All 45 locations with floor, sector, and flags (equipment only, no equipment parking) |
 | GET | `/api/locations/{id}/rooms` | Everyone | Room numbers for a unit, like 601 to 616 |
 | GET | `/api/lists` | Everyone | Every dropdown: priorities, transport modes, equipment types, clinical requirements, isolation types, delay reasons, cancel reasons |
@@ -191,7 +192,7 @@ Delayed and escalated are flags on a call, not statuses. Anything else returns a
 | Method | Route | Who | What it does |
 |---|---|---|---|
 | POST / PATCH | `/api/locations` | Admin | Add or change a location, its sector, or its flags |
-| POST / PATCH | `/api/sectors` | Admin | Add or change sectors and which ones neighbor each other |
+| POST / PATCH | `/api/sectors` | Admin | Add or change sectors |
 | GET / POST / PATCH | `/api/routine-runs` | Admin | Routine runs (O2 restock, Endo specimen runs): times, rotation, on or off |
 
 Accounts and roles are managed in Keycloak (and later Active Directory), not through this API.

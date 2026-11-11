@@ -5,7 +5,7 @@ How real transport works, step by step. These double as our user stories and dri
 
 ## 1. Patient trip (standard flow)
 1. A department submits a request to move a patient from their room to a destination.
-2. The call goes to a transporter in the pickup's sector, who has to acknowledge it (**acknowledged**). See `lists.md` for the timing rules.
+2. The call goes to a transporter who has the pickup's sector in their First sectors (see `hospital.md`), who has to acknowledge it (**acknowledged**). See `lists.md` for the timing rules.
 3. The transporter heads to the room (**en route**), finds the nurse, and makes sure they know and that the patient is okay to go (**arrived**).
 4. The transporter scans the wristband to confirm the right patient (**picked up**).
 5. The nurse or tech removes anything that needs to come off before the trip.
@@ -45,7 +45,7 @@ How real transport works, step by step. These double as our user stories and dri
 
 ## 6. Equipment
 Equipment requests come in two kinds:
-- **Bring one:** staff request a type of equipment for a room. The start point is where that equipment is kept (like Bed Park) or left open, and the transporter grabs the nearest one. Beds must be clean.
+- **Bring one:** staff request a type of equipment for a room. The start point is where that equipment is kept (like Bed Park) or left open, and the transporter grabs one from wherever. What matters is that it gets brought. Beds must be clean.
   - **Example:** "bring a bed to 6 ICU 675."
 - **Move a specific one:** staff request a specific piece of equipment from one place to another, with a fixed start and end.
   - **Example:** "bring the bed from 403 to 6 ICU."
