@@ -1,0 +1,262 @@
+// Hospital Transport Ticket System: database draft
+// Paste into https://dbdiagram.io, then Export > PNG as docs/database.png
+
+Enum request_type {
+  PATIENT
+  EQUIPMENT
+  SPECIMEN
+}
+Enum priority {
+  STAT
+  REGULAR
+}
+Enum request_status {
+  NEW
+  ASSIGNED
+  ACKNOWLEDGED
+  EN_ROUTE
+  ARRIVED
+  PICKED_UP
+  COMPLETED
+  POSTPONED
+  CANCELLED
+}
+Enum trip_purpose {
+  TRANSFER
+  TEST
+  PROCEDURE
+  DISCHARGE
+}
+Enum transport_mode {
+  WHEELCHAIR
+  STRETCHER
+  BED
+}
+Enum equipment_type {
+  BED
+  STRETCHER
+  WHEELCHAIR
+  O2_TANK
+  CODE_CART
+  OTHER
+}
+Enum isolation_type {
+  NONE
+  CONTACT
+  ENTERIC_CONTACT
+  DROPLET
+  AIRBORNE
+  SPECIAL_RESPIRATORY
+  PROTECTIVE
+}
+Enum app_role {
+  STAFF
+  TRANSPORTER
+  DISPATCHER
+  MANAGER
+  ADMIN
+}
+Enum transporter_status {
+  AVAILABLE
+  ON_CALL
+  ON_BREAK
+  INACTIVE
+  SIGNED_OUT
+}
+Enum reason_type {
+  DELAY
+  CANCEL
+}
+Enum assigned_by {
+  ENGINE
+  DISPATCHER
+}
+Enum sector_rank {
+  FIRST
+  SECONDARY
+}
+
+Table sectors {
+  id integer [pk, increment]
+  code varchar [unique, not null, note: 'ED, MAIN, or SURGICAL']
+  name varchar [not null]
+}
+
+Table locations {
+  id integer [pk, increment]
+  name varchar [not null]
+  floor varchar [not null, note: 'B, A, 1-7']
+  sector_id integer [ref: > sectors.id, note: 'null = shared area']
+  equipment_only boolean [not null, default: false]
+  no_equipment_parking boolean [not null, default: false]
+}
+
+Table departments {
+  id integer [pk, increment]
+  name varchar [not null]
+  location_id integer [not null, ref: > locations.id]
+}
+
+Table rooms {
+  id integer [pk, increment]
+  location_id integer [not null, ref: > locations.id]
+  number varchar [not null, note: '612, N14']
+  indexes {
+    (location_id, number) [unique]
+  }
+}
+
+Table users {
+  id integer [pk, increment]
+  keycloak_id varchar [unique, not null]
+  name varchar [not null]
+  role app_role [not null]
+  department_id integer [ref: > departments.id, note: 'staff only']
+  status transporter_status [note: 'transporters only']
+  last_location_id integer [ref: > locations.id]
+  last_call_finished_at timestamptz
+  Note: 'No passwords. Logins come from Keycloak / AD. Java class: AppUser'
+}
+
+Table patients {
+  id integer [pk, increment]
+  fake_name varchar [not null]
+  fake_mrn varchar [unique, not null, note: 'what the wristband QR holds']
+  current_location_id integer [ref: > locations.id]
+  current_room varchar
+  isolation_type isolation_type [not null, default: 'NONE']
+  discharged boolean [not null, default: false]
+}
+
+Table equipment {
+  id integer [pk, increment]
+  asset_tag varchar [unique, not null, note: 'BED-001, STR-014...']
+  type equipment_type [not null]
+  last_location_id integer [ref: > locations.id]
+  o2_full boolean [note: 'O2 tanks only']
+}
+
+Table reasons {
+  id integer [pk, increment]
+  type reason_type [not null]
+  code varchar [not null]
+  label varchar [not null]
+  indexes {
+    (type, code) [unique]
+  }
+}
+
+Table recurring_runs {
+  id integer [pk, increment]
+  name varchar [not null, note: 'O2 restock, Endo specimen run']
+  type request_type [not null]
+  from_location_id integer [not null, ref: > locations.id]
+  to_location_id integer [ref: > locations.id, note: 'null when it rotates']
+  rotation "varchar[]" [note: 'floors in order: A,2,3,4,5,6,7']
+  times_of_day "varchar[]" [not null, note: 'hospital time, like 00:00 and 19:00']
+  next_rotation_index integer [not null, default: 0]
+  active boolean [not null, default: true]
+}
+
+Table requests {
+  id integer [pk, increment]
+  type request_type [not null]
+  priority priority [not null]
+  status request_status [not null, default: 'NEW']
+  escalated boolean [not null, default: false]
+  delay_reason_id integer [ref: > reasons.id]
+  department_id integer [not null, ref: > departments.id]
+  requested_by integer [not null, ref: > users.id]
+  from_location_id integer [ref: > locations.id, note: 'null = bring the nearest one (equipment)']
+  from_room varchar
+  to_location_id integer [not null, ref: > locations.id]
+  to_room varchar
+  patient_id integer [ref: > patients.id]
+  trip_purpose trip_purpose
+  transport_mode transport_mode
+  transport_brings_equipment boolean [not null, default: false]
+  clinical_requirements "varchar[]"
+  isolation_type isolation_type
+  equipment_type equipment_type
+  quantity integer
+  equipment_id integer [ref: > equipment.id]
+  postponed_until timestamptz
+  scheduled_for timestamptz
+  recurring_run_id integer [ref: > recurring_runs.id]
+  notes varchar
+  version integer [not null, default: 0]
+  created_at timestamptz [not null, default: `now()`]
+  assigned_at timestamptz
+  indexes {
+    status
+    (priority, created_at)
+  }
+}
+
+Table request_assignments {
+  id integer [pk, increment]
+  request_id integer [not null, ref: > requests.id]
+  user_id integer [not null, ref: > users.id]
+  assigned_by assigned_by [not null]
+  assigned_at timestamptz [not null, default: `now()`]
+  acknowledged_at timestamptz
+  removed_at timestamptz
+  reason varchar [note: 'why a dispatcher changed it']
+}
+
+Table request_events {
+  id integer [pk, increment]
+  request_id integer [not null, ref: > requests.id]
+  status request_status [not null]
+  changed_by integer [ref: > users.id, note: 'null = the system']
+  reason_id integer [ref: > reasons.id]
+  note varchar
+  created_at timestamptz [not null, default: `now()`]
+  Note: 'Append-only audit log'
+}
+
+Table messages {
+  id integer [pk, increment]
+  request_id integer [ref: > requests.id, note: 'null = direct message']
+  from_user_id integer [not null, ref: > users.id]
+  to_user_id integer [ref: > users.id, note: 'null = call thread']
+  body varchar [not null]
+  created_at timestamptz [not null, default: `now()`]
+  read_at timestamptz
+}
+
+Table shifts {
+  id integer [pk, increment]
+  user_id integer [not null, ref: > users.id]
+  signed_in_at timestamptz [not null, default: `now()`]
+  signed_out_at timestamptz
+}
+
+Table shift_sectors {
+  shift_id integer [not null, ref: > shifts.id]
+  sector_id integer [not null, ref: > sectors.id]
+  rank sector_rank [not null, note: 'picked at sign-in']
+  indexes {
+    (shift_id, sector_id) [pk]
+  }
+  Note: 'Which sectors a transporter has in First and Secondary this shift'
+}
+
+Table breaks {
+  id integer [pk, increment]
+  shift_id integer [not null, ref: > shifts.id]
+  started_at timestamptz [not null, default: `now()`]
+  ended_at timestamptz
+  started_by integer [ref: > users.id]
+  Note: 'Java class: BreakPeriod'
+}
+
+Table location_links {
+  from_id integer [not null, ref: > locations.id]
+  to_id integer [not null, ref: > locations.id]
+  travel_seconds integer [not null]
+  indexes {
+    (from_id, to_id) [pk]
+  }
+  Note: 'Walking time between neighboring spots, for smart dispatch (stretch)'
+}
